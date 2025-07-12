@@ -1,0 +1,11 @@
+camera_topics: [
+    "/zed/zed_node/rgb/image_rect_color",
+    "/hamilton/frontleft/color/image_raw",
+]
+info_topics: [
+    "/zed/zed_node/rgb/camera_info",
+    "/hamilton/frontleft/color/camera_info",
+]
+april_tag: 26
+size: .14605
+frames: ["zed_camera_link", "hamilton/frontleft"]
