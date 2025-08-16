@@ -2,7 +2,7 @@ import json
 import argparse
 import robotdatapy as rdp
 
-from calibration_change_frames import calibration_change_frames_from_tf_static
+from multi_camera_calibration.calibration_change_frames import calibration_change_frames_from_tf_static
 
 def process_direct_visual_lidar_calibration_output(
         json_output, bag, desired_parent_frame_id, desired_child_frame_id):
