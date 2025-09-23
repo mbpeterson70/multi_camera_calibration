@@ -5,7 +5,8 @@ import robotdatapy as rdp
 from multi_camera_calibration.calibration_change_frames import calibration_change_frames_from_tf_static
 
 def process_direct_visual_lidar_calibration_output(
-        json_output, bag, desired_parent_frame_id, desired_child_frame_id):
+        json_output, bag, desired_parent_frame_id, desired_child_frame_id,
+        calib_result='T_lidar_camera'):
     f = open(json_output)
     output_dict = json.load(f)
     f.close()
@@ -19,7 +20,7 @@ def process_direct_visual_lidar_calibration_output(
     img_frame_id = img_data.img_header(img_data.t0).frame_id
     pcd_frame_id = pcd_data.msg_header(pcd_data.t0).frame_id
 
-    T_lidar_camera_xyzquat = output_dict['results']['T_lidar_camera']
+    T_lidar_camera_xyzquat = output_dict['results'][calib_result]
     T_lidar_camera = rdp.transform.xyz_quat_to_transform(
         T_lidar_camera_xyzquat[:3], T_lidar_camera_xyzquat[3:])
 
@@ -36,18 +37,31 @@ def process_direct_visual_lidar_calibration_output(
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-j', '--json-calibration', required=True)
-    parser.add_argument('-b', '--bag', required=True)
-    parser.add_argument('-f', '--frame-ids', nargs=2, required=True)
+    parser.add_argument('-j', '--json-calibration', required=True,
+        help='path to calib.json file from Direct Visual Lidar Calibration')
+    parser.add_argument('-b', '--bag', required=True,
+        help='path to bag')
+    parser.add_argument('-f', '--frame-ids', nargs=2, required=True, 
+        help='desired transform frames ids: [1] parent [2] child')
+    parser.add_argument('--calib-result', default='T_lidar_camera',
+        help='Result to use: [T_lidar_camera, init_T_lidar_camera, init_T_lidar_camera_auto]')
 
     args = parser.parse_args()
 
     T_parent_child = process_direct_visual_lidar_calibration_output(
-        args.json_calibration, args.bag, args.frame_ids[0], args.frame_ids[1]
+        args.json_calibration, args.bag, args.frame_ids[0], args.frame_ids[1],
+        args.calib_result
     )
 
-    print(f"T^{args.frame_ids[0]}_{args.frame_ids[1]} = ")
+    print(f"T^{{{args.frame_ids[0]}}}_{{{args.frame_ids[1]}}} = ")
     print(T_parent_child)
 
-    xyzrpy = rdp.transform.transform_to_xyz_quat(T_parent_child)
+    xyzquat = rdp.transform.transform_to_xyz_quat(T_parent_child)
+    xyzrpy = rdp.transform.transform_to_xyzrpy(T_parent_child)
     print(f'<origin xyz="{xyzrpy[0]} {xyzrpy[1]} {xyzrpy[2]}" rpy="{xyzrpy[3]} {xyzrpy[4]} {xyzrpy[5]}" />')
+    print()
+    print(f'static_transform_publisher:')
+    print(f'ros2 run tf2_ros static_transform_publisher ' + 
+          f'--x {xyzquat[0]} --y {xyzquat[1]} --z {xyzquat[2]} ' +
+          f'--qx {xyzquat[3]} --qy {xyzquat[4]} --qz {xyzquat[5]} --qw {xyzquat[6]}' +
+          f'--frame-id {args.frame_ids[0]} --child-frame-id {args.frame_ids[1]}')
