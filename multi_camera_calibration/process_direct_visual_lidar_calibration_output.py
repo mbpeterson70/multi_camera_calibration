@@ -63,5 +63,5 @@ if __name__ == '__main__':
     print(f'static_transform_publisher:')
     print(f'ros2 run tf2_ros static_transform_publisher ' + 
           f'--x {xyzquat[0]} --y {xyzquat[1]} --z {xyzquat[2]} ' +
-          f'--qx {xyzquat[3]} --qy {xyzquat[4]} --qz {xyzquat[5]} --qw {xyzquat[6]}' +
+          f'--qx {xyzquat[3]} --qy {xyzquat[4]} --qz {xyzquat[5]} --qw {xyzquat[6]} ' +
           f'--frame-id {args.frame_ids[0]} --child-frame-id {args.frame_ids[1]}')
