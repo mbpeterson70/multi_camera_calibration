@@ -6,7 +6,8 @@ build-backend = "hatchling.build"
 name = "multi_camera_calibration"
 version = "0.0.1"
 dependencies = [
-    "numpy"
+    "numpy",
+    "robotdatapy"
 ]
 requires-python = ">=3.8"
 authors = [
